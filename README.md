@@ -19,13 +19,17 @@ git clone https://github.com/jeredbare/ms17-010_to_slack.git [directory]
 
 # example
 *config*
+
 nmap --script smb-vuln-ms17-010.nse -p445 127.0.0.1 >> ms17-010_hosts.txt
 curl -F file=@"ms17-010_hosts.txt" -F initial_comment="MS17-010 Vulerable Machines" -F channels=#MS17-010 -F token=xoxp-special-token-010101010 https://slack.com/api/files.upload >> /dev/null
 
 *running the script*
+
 ./ms017-010_slack.sh
 
 *output (in slack)*
+
+```
 Starting Nmap 7.40 ( https://nmap.org ) at 2017-05-15 13:33 CDT
 Nmap scan report for vulnr-host-inside-the-network (127.0.0.1)
 Host is up (0.00048s latency).
@@ -46,7 +50,7 @@ Host script results:
 |       https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2017-0143
 |       https://technet.microsoft.com/en-us/library/security/ms17-010.aspx
 |_      https://blogs.technet.microsoft.com/msrc/2017/05/12/customer-guidance-for-wannacrypt-attacks/
-
+```
 
 # additional info
 Before using please insert your slack API token into the "[insert api token here]" in the ms17-010_slack.sh file.  Also modify the appropirate channel you want the alerts put in under the "channels=[channel]"
