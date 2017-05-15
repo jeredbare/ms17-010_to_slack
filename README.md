@@ -12,6 +12,7 @@ git clone https://github.com/jeredbare/ms17-010_to_slack.git [directory]
 
 # how to use this script
 - Edit the script using a text editor and edit the following options: "[insert api token here]" for slack api token and "[channel]" for what channel you would like the alerts in.
+- Make the script executable "chmod +x ms17-010_slack.sh"
 - USAGE: ./ms17-010_slack.sh [ip address or range]
 - This will create a file called "ms17-010_hosts.txt" and will upload the document to slack.
 - IDEA: Run this as a CRON Job to continually scan your environment for vulnerable hosts.  
