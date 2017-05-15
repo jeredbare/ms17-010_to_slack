@@ -20,12 +20,12 @@ git clone https://github.com/jeredbare/ms17-010_to_slack.git [directory]
 # example
 *config*
 
-nmap --script smb-vuln-ms17-010.nse -p445 127.0.0.1 >> ms17-010_hosts.txt
-curl -F file=@"ms17-010_hosts.txt" -F initial_comment="MS17-010 Vulerable Machines" -F channels=#MS17-010 -F token=xoxp-special-token-010101010 https://slack.com/api/files.upload >> /dev/null
+```nmap --script smb-vuln-ms17-010.nse -p445 127.0.0.1 >> ms17-010_hosts.txt
+curl -F file=@"ms17-010_hosts.txt" -F initial_comment="MS17-010 Vulerable Machines" -F channels=#MS17-010 -F token=xoxp-special-token-010101010 https://slack.com/api/files.upload >> /dev/null```
 
 *running the script*
 
-./ms017-010_slack.sh
+```./ms017-010_slack.sh```
 
 *output (in slack)*
 
