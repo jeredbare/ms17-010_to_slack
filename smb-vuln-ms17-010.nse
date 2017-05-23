@@ -6,14 +6,11 @@ local string = require "string"
 description = [[
 Attempts to detect if a Microsoft SMBv1 server is vulnerable to a remote code
  execution vulnerability (ms17-010).
-
 The script connects to the $IPC tree, executes a transaction on FID 0 and
  checks if the error "STATUS_INSUFF_SERVER_RESOURCES" is returned to
  determine if the target is not patched against ms17-010.
-
 Tested on a vulnerable Windows 7. We might have some issues with v2 protocols with
  signing enabled.
-
 References:
 * https://technet.microsoft.com/en-us/library/security/ms17-010.aspx
 * https://blogs.technet.microsoft.com/msrc/2017/05/12/customer-guidance-for-wannacrypt-attacks/
@@ -22,7 +19,7 @@ References:
 ]]
 
 ---
--- @usage nmap -p445 --script smb-vuln-ms2017-010 <target>
+-- @usage nmap -p445 --script smb-vuln-ms17-010 <target>
 -- @usage nmap -p445 --script vuln <target>
 --
 -- @output
@@ -77,7 +74,7 @@ hostrule = function(host)
 end
 
 local function check_ms17010(host, port, sharename)
-  local status, smbstate = smb.start_ex(host, true, true, sharename, nil, nil, nil)
+  local status, smbstate = smb.start_ex(host, true, true, "\\\\".. host.ip .. "\\" .. sharename, nil, nil, nil)
   if not status then
     stdnse.debug1("Could not connect to '%s'", sharename)
     return false, string.format("Could not connect to '%s'", sharename)
@@ -98,21 +95,21 @@ local function check_ms17010(host, port, sharename)
       0xFFFF,  -- Max Data count (2 bytes)
       0x0,     -- Max setup Count (1 byte)
       0x0,     -- Reserved (1 byte)
-      0x0,     --Flags (2 bytes)
-      0x0,     --Timeout (4 bytes)
-      0x0,     --Reserved (2 bytes)
-      0x0,     --ParameterCount (2 bytes)
-      0x4a00,  --ParameterOffset (2 bytes)
-      0x0,     --DataCount (2 bytes)
+      0x0,     -- Flags (2 bytes)
+      0x0,     -- Timeout (4 bytes)
+      0x0,     -- Reserved (2 bytes)
+      0x0,     -- ParameterCount (2 bytes)
+      0x4a00,  -- ParameterOffset (2 bytes)
+      0x0,     -- DataCount (2 bytes)
       0x4a00,  -- DataOffset (2 bytes)
       0x02,    -- SetupCount (1 byte)
       0x0,     -- Reserved (1 byte)
       0x2300,  -- PeekNamedPipe opcode
       0x0,     --
-      0x0700,  --BCC (Length of "\PIPE\")
-      0x5c50,  --\P
-      0x4950,  --IP 
-      0x455c   --E\
+      0x0700,  -- BCC (Length of "\PIPE\")
+      0x5c50,  -- \P
+      0x4950,  -- IP 
+      0x455c   -- E\
     )
     stdnse.debug2("SMB: Sending SMB_COM_TRANSACTION")
     result, err = smb.smb_send(smbstate, smb_header, smb_params, '', overrides)
@@ -130,6 +127,9 @@ local function check_ms17010(host, port, sharename)
       if err == 0xc0000205 then 
         stdnse.debug1("STATUS_INSUFF_SERVER_RESOURCES response received")
         return true
+      elseif err == 0xc0000022 then
+        stdnse.debug1("STATUS_ACCESS_DENIED response received. This system is likely patched.")
+	return false, "This system is patched."
       end
     else
       stdnse.debug1("Received invalid command id.")
@@ -165,7 +165,7 @@ A critical remote code execution vulnerability exists in Microsoft SMBv1
     stdnse.debug1("This host is missing the patch for ms17-010!")
     vuln.state = vulns.STATE.VULN
   else
-    if nmap.verbosity() >=1 then
+    if nmap.verbosity() >=2 then
       return err
     end
   end
